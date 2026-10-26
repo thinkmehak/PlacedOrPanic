@@ -1,9 +1,11 @@
 /**
  * PlacedOrPanic - Main Application Controller
- * Handles screen transitions, DOM events, UI updates, and interactive feedback.
+ * Handles candidate identity, tactile audio triggers, screen transitions,
+ * analytics dashboard, and verified certificate exports.
  */
 
 let activeQuiz = null;
+let currentResults = null;
 
 // DOM Elements Cache
 const DOM = {
@@ -12,6 +14,28 @@ const DOM = {
     quiz: document.getElementById('screen-quiz-stage'),
     scorecard: document.getElementById('screen-scorecard')
   },
+  candidate: {
+    welcomeName: document.getElementById('candidate-display-name'),
+    inputName: document.getElementById('input-candidate-name'),
+    inputCollege: document.getElementById('input-candidate-college'),
+    btnSaveProfile: document.getElementById('btn-save-candidate-profile'),
+    headerPill: document.getElementById('header-candidate-pill'),
+    headerName: document.getElementById('header-candidate-name'),
+    scorecardBadge: document.getElementById('scorecard-candidate-name')
+  },
+  analytics: {
+    attemptsCount: document.getElementById('dash-total-attempts'),
+    avgAccuracy: document.getElementById('dash-avg-accuracy'),
+    meterAptitude: document.getElementById('meter-aptitude-fill'),
+    valAptitude: document.getElementById('meter-aptitude-val'),
+    meterC: document.getElementById('meter-c-fill'),
+    valC: document.getElementById('meter-c-val'),
+    meterCF: document.getElementById('meter-cf-fill'),
+    valCF: document.getElementById('meter-cf-val'),
+    meterWeb: document.getElementById('meter-web-fill'),
+    valWeb: document.getElementById('meter-web-val')
+  },
+  audioToggleBtn: document.getElementById('btn-toggle-audio'),
   topicCardsContainer: document.getElementById('topics-grid-container'),
   quiz: {
     topicBadge: document.getElementById('quiz-topic-title'),
@@ -38,7 +62,8 @@ const DOM = {
     metricTime: document.getElementById('metric-time-taken'),
     reviewList: document.getElementById('detailed-review-list'),
     btnRetake: document.getElementById('btn-retake-quiz'),
-    btnHome: document.getElementById('btn-home-return')
+    btnHome: document.getElementById('btn-home-return'),
+    btnDownloadPDF: document.getElementById('btn-download-pdf-scorecard')
   },
   modals: {
     teaserModal: document.getElementById('teaser-modal'),
@@ -52,7 +77,49 @@ const DOM = {
 };
 
 /* --------------------------------------------------------------------------
-   1. Screen Navigation
+   1. Candidate Profile & Analytics Handling
+   -------------------------------------------------------------------------- */
+function loadCandidateProfile() {
+  const profile = StorageManager.getProfile();
+  const name = profile.name ? profile.name.trim() : 'Candidate';
+  if (DOM.candidate.welcomeName) DOM.candidate.welcomeName.textContent = name;
+  if (DOM.candidate.headerName) DOM.candidate.headerName.textContent = name;
+  if (DOM.candidate.inputName) DOM.candidate.inputName.value = profile.name || '';
+  if (DOM.candidate.inputCollege) DOM.candidate.inputCollege.value = profile.college || '';
+}
+
+function updateAnalyticsDashboard() {
+  const attempts = StorageManager.getAttempts();
+  const stats = StorageManager.getTopicStats();
+
+  if (DOM.analytics.attemptsCount) {
+    DOM.analytics.attemptsCount.textContent = `${attempts.length} Finished`;
+  }
+
+  // Calculate overall average accuracy
+  if (DOM.analytics.avgAccuracy) {
+    if (attempts.length === 0) {
+      DOM.analytics.avgAccuracy.textContent = '0%';
+    } else {
+      const totalAcc = attempts.reduce((acc, curr) => acc + curr.accuracy, 0);
+      DOM.analytics.avgAccuracy.textContent = `${Math.round(totalAcc / attempts.length)}%`;
+    }
+  }
+
+  // Update Progress Bars per Topic
+  const updateBar = (fillElem, valElem, bestScore) => {
+    if (fillElem) fillElem.style.width = `${bestScore}%`;
+    if (valElem) valElem.textContent = `${bestScore}% Best`;
+  };
+
+  updateBar(DOM.analytics.meterAptitude, DOM.analytics.valAptitude, stats.aptitude.bestScore);
+  updateBar(DOM.analytics.meterC, DOM.analytics.valC, stats.c_programming.bestScore);
+  updateBar(DOM.analytics.meterCF, DOM.analytics.valCF, stats.computer_fundamentals.bestScore);
+  updateBar(DOM.analytics.meterWeb, DOM.analytics.valWeb, stats.web_basics.bestScore);
+}
+
+/* --------------------------------------------------------------------------
+   2. Screen Navigation
    -------------------------------------------------------------------------- */
 function showScreen(screenKey) {
   Object.values(DOM.screens).forEach(screen => {
@@ -65,7 +132,7 @@ function showScreen(screenKey) {
 }
 
 /* --------------------------------------------------------------------------
-   2. Render Topics
+   3. Render Topics
    -------------------------------------------------------------------------- */
 function renderTopicCards() {
   if (!DOM.topicCardsContainer) return;
@@ -95,17 +162,40 @@ function renderTopicCards() {
       </div>
     `;
 
-    card.addEventListener('click', (e) => {
-      // Allow clicking entire card or button
-      startQuizSession(topic.id);
+    card.addEventListener('click', () => {
+      soundEngine.playClick();
+      handleTopicCardClick(topic.id);
     });
 
     DOM.topicCardsContainer.appendChild(card);
   });
 }
 
+let pendingTopicLaunchId = null;
+
+function handleTopicCardClick(topicId) {
+  const profile = StorageManager.getProfile();
+  // If user has not entered a name yet, prompt the launch verification modal
+  if (!profile.name || profile.name.trim().length < 2) {
+    pendingTopicLaunchId = topicId;
+    const profileModal = document.getElementById('candidate-profile-modal');
+    const topicData = QUIZ_TOPICS[topicId];
+    const subtitle = document.getElementById('launch-modal-subtitle');
+    if (subtitle && topicData) {
+      subtitle.innerHTML = `You are about to launch <strong>${topicData.name}</strong> (${topicData.durationMinutes} mins). Please enter your name for your certificate.`;
+    }
+    if (DOM.candidate.inputName) DOM.candidate.inputName.value = '';
+    if (profileModal) profileModal.classList.add('active');
+    if (DOM.candidate.inputName) DOM.candidate.inputName.focus();
+  } else {
+    // Name already verified, start quiz directly
+    startQuizSession(topicId);
+  }
+}
+
+
 /* --------------------------------------------------------------------------
-   3. Start Quiz Session
+   4. Start Quiz Session
    -------------------------------------------------------------------------- */
 function startQuizSession(topicId) {
   try {
@@ -119,12 +209,16 @@ function startQuizSession(topicId) {
     activeQuiz.onPanic = (isPanic) => {
       if (isPanic) {
         DOM.quiz.timerContainer.classList.add('panic-mode');
+        soundEngine.startHeartbeat();
       } else {
         DOM.quiz.timerContainer.classList.remove('panic-mode');
+        soundEngine.stopHeartbeat();
       }
     };
 
     activeQuiz.onTimeExpired = () => {
+      soundEngine.stopHeartbeat();
+      soundEngine.playPanicBuzzer();
       alert("⏱️ TIME'S UP! Your test is automatically being evaluated.");
       submitAndEvaluateQuiz();
     };
@@ -145,7 +239,7 @@ function startQuizSession(topicId) {
 }
 
 /* --------------------------------------------------------------------------
-   4. Render Current Question & Option List
+   5. Render Current Question & Option List
    -------------------------------------------------------------------------- */
 function renderCurrentQuestion() {
   if (!activeQuiz) return;
@@ -190,6 +284,7 @@ function renderCurrentQuestion() {
     `;
 
     optionDiv.addEventListener('click', () => {
+      soundEngine.playClick();
       activeQuiz.selectOption(idx);
       renderCurrentQuestion();
       renderPalette();
@@ -208,7 +303,7 @@ function renderCurrentQuestion() {
 }
 
 /* --------------------------------------------------------------------------
-   5. Render Palette (Switchboard)
+   6. Render Palette (Switchboard)
    -------------------------------------------------------------------------- */
 function renderPalette() {
   if (!activeQuiz) return;
@@ -221,6 +316,7 @@ function renderPalette() {
     key.textContent = status.number;
 
     key.addEventListener('click', () => {
+      soundEngine.playClick();
       activeQuiz.jumpToQuestion(i);
       renderCurrentQuestion();
       renderPalette();
@@ -231,29 +327,44 @@ function renderPalette() {
 }
 
 /* --------------------------------------------------------------------------
-   6. Submit & Automated Evaluation
+   7. Submit & Automated Evaluation
    -------------------------------------------------------------------------- */
 function submitAndEvaluateQuiz() {
   if (!activeQuiz) return;
-  const results = activeQuiz.evaluateResults();
-  StorageManager.saveAttempt(results);
+  soundEngine.stopHeartbeat();
+
+  currentResults = activeQuiz.evaluateResults();
+  StorageManager.saveAttempt(currentResults);
+  updateAnalyticsDashboard();
+
+  const isPlaced = currentResults.verdict === 'PLACED';
+  if (isPlaced) {
+    soundEngine.playVictory();
+  } else {
+    soundEngine.playPanicBuzzer();
+  }
+
+  // Candidate Name on Scorecard
+  const profile = StorageManager.getProfile();
+  if (DOM.candidate.scorecardBadge) {
+    DOM.candidate.scorecardBadge.textContent = profile.name ? `Candidate: ${profile.name}` : 'Candidate: Anonymous';
+  }
 
   // Update Scorecard View
-  const isPlaced = results.verdict === 'PLACED';
   DOM.scorecard.emblem.className = `status-emblem ${isPlaced ? 'placed' : 'panic'}`;
   DOM.scorecard.emblem.textContent = isPlaced ? '💼' : '🚨';
 
-  DOM.scorecard.verdictTitle.textContent = results.verdictTitle;
+  DOM.scorecard.verdictTitle.textContent = currentResults.verdictTitle;
   DOM.scorecard.verdictTitle.style.color = isPlaced ? 'var(--status-placed)' : 'var(--status-panic)';
-  DOM.scorecard.verdictMessage.textContent = results.verdictMessage;
+  DOM.scorecard.verdictMessage.textContent = currentResults.verdictMessage;
 
-  DOM.scorecard.metricScore.textContent = `${results.rawScore} / ${results.maxScore}`;
-  DOM.scorecard.metricAccuracy.textContent = `${results.accuracy}%`;
-  DOM.scorecard.metricTime.textContent = results.formattedTimeTaken;
+  DOM.scorecard.metricScore.textContent = `${currentResults.rawScore} / ${currentResults.maxScore}`;
+  DOM.scorecard.metricAccuracy.textContent = `${currentResults.accuracy}%`;
+  DOM.scorecard.metricTime.textContent = currentResults.formattedTimeTaken;
 
   // Render Detailed Explanations
   DOM.scorecard.reviewList.innerHTML = '';
-  results.breakdown.forEach((item) => {
+  currentResults.breakdown.forEach((item) => {
     const reviewCard = document.createElement('div');
     const statusClass = !item.isAnswered ? 'unanswered' : (item.isCorrect ? 'correct' : 'incorrect');
     reviewCard.className = `review-item ${statusClass}`;
@@ -286,24 +397,157 @@ function submitAndEvaluateQuiz() {
 }
 
 /* --------------------------------------------------------------------------
-   7. Event Listeners Setup
+   8. Event Listeners Setup
    -------------------------------------------------------------------------- */
 function initEventListeners() {
+  // Candidate profile save with full edgecase handling
+  if (DOM.candidate.btnSaveProfile) {
+    const errorElem = document.getElementById('candidate-error-msg');
+    const nameInput = DOM.candidate.inputName;
+    const collegeInput = DOM.candidate.inputCollege;
+
+    const clearInputError = () => {
+      if (nameInput) nameInput.classList.remove('input-error');
+      if (errorElem) {
+        errorElem.style.display = 'none';
+        errorElem.textContent = '';
+      }
+    };
+
+    if (nameInput) {
+      nameInput.addEventListener('input', clearInputError);
+    }
+
+    DOM.candidate.btnSaveProfile.addEventListener('click', () => {
+      clearInputError();
+      const rawName = nameInput ? nameInput.value : '';
+      const rawCollege = collegeInput ? collegeInput.value : '';
+      const name = rawName.trim();
+      const college = rawCollege.trim();
+
+      // Edgecase 1: Completely empty or whitespace-only name
+      if (!name) {
+        soundEngine.playPanicBuzzer();
+        if (nameInput) {
+          nameInput.classList.add('input-error');
+          nameInput.focus();
+        }
+        if (errorElem) {
+          errorElem.style.display = 'block';
+          errorElem.className = 'candidate-feedback-msg error';
+          errorElem.textContent = '⚠️ Please enter your name before saving.';
+        }
+        return;
+      }
+
+      // Edgecase 2: Name too short (e.g. single character)
+      if (name.length < 2) {
+        soundEngine.playPanicBuzzer();
+        if (nameInput) {
+          nameInput.classList.add('input-error');
+          nameInput.focus();
+        }
+        if (errorElem) {
+          errorElem.style.display = 'block';
+          errorElem.className = 'candidate-feedback-msg error';
+          errorElem.textContent = '⚠️ Name must be at least 2 characters.';
+        }
+        return;
+      }
+
+      // Edgecase 3: Valid Input - Save and launch quiz
+      soundEngine.playVictory();
+      StorageManager.saveProfile({ 
+        name, 
+        college: college || 'Campus Placement Drive' 
+      });
+      loadCandidateProfile();
+
+      if (errorElem) {
+        errorElem.style.display = 'block';
+        errorElem.className = 'candidate-feedback-msg success';
+        errorElem.textContent = `✅ Verified! Launching test...`;
+      }
+
+      setTimeout(() => {
+        const modal = document.getElementById('candidate-profile-modal');
+        if (modal) modal.classList.remove('active');
+        if (errorElem) errorElem.style.display = 'none';
+        
+        // Launch quiz if pending
+        if (pendingTopicLaunchId) {
+          const tId = pendingTopicLaunchId;
+          pendingTopicLaunchId = null;
+          startQuizSession(tId);
+        }
+      }, 600);
+    });
+  }
+
+  // Candidate Profile Modal Close & Cancel
+  const profileModal = document.getElementById('candidate-profile-modal');
+  const btnCloseProfile = document.getElementById('btn-close-profile-modal');
+  const btnCancelProfile = document.getElementById('btn-cancel-candidate-profile');
+
+  if (btnCloseProfile && profileModal) {
+    btnCloseProfile.addEventListener('click', () => {
+      soundEngine.playClick();
+      profileModal.classList.remove('active');
+      pendingTopicLaunchId = null;
+    });
+  }
+
+  if (btnCancelProfile && profileModal) {
+    btnCancelProfile.addEventListener('click', () => {
+      soundEngine.playClick();
+      profileModal.classList.remove('active');
+      pendingTopicLaunchId = null;
+    });
+  }
+
+  // Floating Audio Toggle Button (Bottom-Right FAB)
+  if (DOM.audioToggleBtn) {
+    DOM.audioToggleBtn.addEventListener('click', () => {
+      const isMuted = soundEngine.toggleMute();
+      if (isMuted) {
+        DOM.audioToggleBtn.classList.add('muted');
+        DOM.audioToggleBtn.innerHTML = '🔇';
+        DOM.audioToggleBtn.setAttribute('title', 'Sound Muted (Click to turn on)');
+      } else {
+        DOM.audioToggleBtn.classList.remove('muted');
+        DOM.audioToggleBtn.innerHTML = '🔊';
+        DOM.audioToggleBtn.setAttribute('title', 'Sound Active (Click to mute)');
+        soundEngine.playClick();
+      }
+    });
+  }
+
+
+  // Download Placement Scorecard Certificate PDF
+  if (DOM.scorecard.btnDownloadPDF) {
+    DOM.scorecard.btnDownloadPDF.addEventListener('click', () => {
+      soundEngine.playVictory();
+      const profile = StorageManager.getProfile();
+      PDFCertificateGenerator.downloadCertificate(currentResults, profile);
+    });
+  }
+
   // Navigation inside quiz
   DOM.quiz.btnNext.addEventListener('click', () => {
+    soundEngine.playClick();
     if (activeQuiz) {
       if (activeQuiz.currentIndex < activeQuiz.totalQuestions - 1) {
         activeQuiz.nextQuestion();
         renderCurrentQuestion();
         renderPalette();
       } else {
-        // At the last question, clicking next triggers submission confirmation
         openSubmitModal();
       }
     }
   });
 
   DOM.quiz.btnPrev.addEventListener('click', () => {
+    soundEngine.playClick();
     if (activeQuiz) {
       activeQuiz.previousQuestion();
       renderCurrentQuestion();
@@ -312,6 +556,7 @@ function initEventListeners() {
   });
 
   DOM.quiz.btnClear.addEventListener('click', () => {
+    soundEngine.playClick();
     if (activeQuiz) {
       const q = activeQuiz.getCurrentQuestion();
       delete activeQuiz.answers[q.id];
@@ -321,6 +566,7 @@ function initEventListeners() {
   });
 
   DOM.quiz.reviewBtn.addEventListener('click', () => {
+    soundEngine.playSwitch();
     if (activeQuiz) {
       activeQuiz.toggleMarkForReview();
       renderCurrentQuestion();
@@ -329,7 +575,10 @@ function initEventListeners() {
   });
 
   // Submit test confirmation modal
-  DOM.quiz.btnSubmit.addEventListener('click', openSubmitModal);
+  DOM.quiz.btnSubmit.addEventListener('click', () => {
+    soundEngine.playClick();
+    openSubmitModal();
+  });
 
   function openSubmitModal() {
     if (!activeQuiz) return;
@@ -356,23 +605,27 @@ function initEventListeners() {
   });
 
   DOM.modals.btnCancelSubmit.addEventListener('click', () => {
+    soundEngine.playClick();
     DOM.modals.confirmModal.classList.remove('active');
   });
 
   // Scorecard actions
   DOM.scorecard.btnRetake.addEventListener('click', () => {
+    soundEngine.playClick();
     if (activeQuiz) {
       startQuizSession(activeQuiz.topicId);
     }
   });
 
   DOM.scorecard.btnHome.addEventListener('click', () => {
+    soundEngine.playClick();
     showScreen('topic');
   });
 
   // Upcoming feature click teasers
   document.querySelectorAll('[data-feature-teaser]').forEach(elem => {
     elem.addEventListener('click', () => {
+      soundEngine.playClick();
       const featureName = elem.getAttribute('data-feature-teaser') || "Upcoming Module";
       DOM.modals.teaserTitle.textContent = featureName;
       DOM.modals.teaserModal.classList.add('active');
@@ -380,12 +633,15 @@ function initEventListeners() {
   });
 
   DOM.modals.btnCloseTeaser.addEventListener('click', () => {
+    soundEngine.playClick();
     DOM.modals.teaserModal.classList.remove('active');
   });
 }
 
 // Initialization on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
+  loadCandidateProfile();
+  updateAnalyticsDashboard();
   renderTopicCards();
   initEventListeners();
   showScreen('topic');

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlacedOrPanic - Timed Multiple-Choice Quiz Engine</title>
+  <title>PlacedOrPanic - Timed Placement Quiz Management System</title>
   <meta name="description" content="A responsive, interactive timed multiple-choice quiz engine with claymorphic & skeuomorphic design for campus placement tests and semester exam assessment.">
 
-  <!-- Separated Theme Stylesheets as requested -->
+  <!-- Separated Theme Stylesheets -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/theme-claymorphism.css">
   <link rel="stylesheet" href="css/theme-skeuomorphism.css">
@@ -39,17 +39,20 @@
 
     <!-- Screen 1: Topic Selection Screen -->
     <main id="screen-topic-select" class="view-screen active">
+      
+      <!-- Sleek Hero Banner (Clean, Focused, High Impact) -->
       <section class="hero-banner">
         <div class="hero-pill-badge clay-pill">
           ⚡ 100% Client-Side Engine • Zero Latency Assessment
         </div>
         <h2 class="hero-title">Beat the Clock or Face the Panic.</h2>
         <p class="hero-subtitle">
-          Practice realistic, timed placement aptitude and technical screening rounds with active countdowns, review palettes, and automated instant scorecards.
+          Practice realistic, timed placement aptitude and technical screening rounds with active countdowns, review palettes, tactile switchboards, and automated instant scorecards.
         </p>
       </section>
 
-      <!-- Topic Grid Header -->
+
+      <!-- Topic Grid Header (Primary Action on Landing Page) -->
       <div class="topic-grid-title">
         <h2>📚 Core Placement Assessment Topics</h2>
         <span class="clay-pill">4 Core Modules Ready</span>
@@ -59,6 +62,8 @@
       <div id="topics-grid-container" class="topics-grid">
         <!-- Rendered by app.js -->
       </div>
+
+
 
       <!-- Upcoming Features & Categories Section -->
       <section class="upcoming-section clay-inset-well">
@@ -140,7 +145,7 @@
         </div>
       </div>
 
-      <!-- Main Stage Split Layout: Question Pane + Navigation Palette -->
+      <!-- Main Stage Split Layout -->
       <div class="quiz-stage-layout">
         
         <!-- Left: Question & Options Component -->
@@ -183,7 +188,7 @@
           </div>
         </section>
 
-        <!-- Right: Question Palette / Hardware Switchboard -->
+        <!-- Right: Question Palette / Switchboard -->
         <aside class="palette-pane clay-card">
           <div class="palette-header">
             <h3>Question Palette</h3>
@@ -222,6 +227,10 @@
     <!-- Screen 3: Automated Evaluation Scorecard -->
     <main id="screen-scorecard" class="view-screen">
       <section class="scorecard-hero clay-card">
+        <div id="scorecard-candidate-name" class="scorecard-candidate-badge clay-pill">
+          Candidate: Anonymous
+        </div>
+
         <div id="score-emblem" class="status-emblem placed">💼</div>
         <h2 id="score-verdict-title" class="scorecard-title">Placed with Flying Colors!</h2>
         <p id="score-verdict-msg" class="scorecard-subtitle">
@@ -257,14 +266,69 @@
           <button id="btn-home-return" class="clay-btn">
             🏠 Return to Topics
           </button>
-          <button class="clay-btn" data-feature-teaser="Download Verified Placement PDF Certificate" style="background: #f8fafc;">
-            📥 Download Report <span class="badge-coming-soon" style="margin-left: 0.35rem;">Soon</span>
+          <!-- One Click Verified Certificate PDF Generator -->
+          <button id="btn-download-pdf-scorecard" class="clay-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;">
+            📥 Download Verified Scorecard Certificate 📜
           </button>
+        </div>
+      </section>
+
+      <!-- Topic Performance Analytics Radar (Inside Internal Scorecard Screen) -->
+      <section class="analytics-dashboard clay-card" style="margin-bottom: 2.5rem;">
+        <div class="analytics-header">
+          <h3>📊 Cumulative Placement Readiness Radar</h3>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span class="clay-pill" id="dash-total-attempts">0 Finished</span>
+            <span class="clay-pill" style="color: var(--status-placed);">Avg Accuracy: <strong id="dash-avg-accuracy">0%</strong></span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item-box">
+            <div class="stat-title">🧮 Aptitude Mastery</div>
+            <div class="stat-score-line">
+              <span id="meter-aptitude-val" class="stat-score-value">0% Best</span>
+            </div>
+            <div class="stat-meter-track">
+              <div id="meter-aptitude-fill" class="stat-meter-fill" style="width: 0%; background: #f59e0b;"></div>
+            </div>
+          </div>
+
+          <div class="stat-item-box">
+            <div class="stat-title">💻 C Programming</div>
+            <div class="stat-score-line">
+              <span id="meter-c-val" class="stat-score-value">0% Best</span>
+            </div>
+            <div class="stat-meter-track">
+              <div id="meter-c-fill" class="stat-meter-fill" style="width: 0%; background: #3b82f6;"></div>
+            </div>
+          </div>
+
+          <div class="stat-item-box">
+            <div class="stat-title">🖥️ Computer Fundamentals</div>
+            <div class="stat-score-line">
+              <span id="meter-cf-val" class="stat-score-value">0% Best</span>
+            </div>
+            <div class="stat-meter-track">
+              <div id="meter-cf-fill" class="stat-meter-fill" style="width: 0%; background: #10b981;"></div>
+            </div>
+          </div>
+
+          <div class="stat-item-box">
+            <div class="stat-title">🌐 Web Basics</div>
+            <div class="stat-score-line">
+              <span id="meter-web-val" class="stat-score-value">0% Best</span>
+            </div>
+            <div class="stat-meter-track">
+              <div id="meter-web-fill" class="stat-meter-fill" style="width: 0%; background: #6366f1;"></div>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Detailed Question-by-Question Review with Explanations -->
       <section class="review-section clay-card">
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <h3 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800;">
             📝 Detailed Question Explanations & Answer Key
@@ -304,6 +368,45 @@
     </div>
   </div>
 
+  <!-- Candidate Test Launch Gatekeeper Modal (Prompted seamlessly when launching test) -->
+  <div id="candidate-profile-modal" class="teaser-modal-overlay">
+    <div class="teaser-modal-box clay-card" style="text-align: left; max-width: 480px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <h3 id="launch-modal-title" style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+          🚀 Candidate Verification
+        </h3>
+        <button id="btn-close-profile-modal" class="clay-pill" style="cursor: pointer; background: transparent; font-size: 1rem; padding: 0.2rem 0.6rem;">✕</button>
+      </div>
+      <p id="launch-modal-subtitle" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 1.25rem;">
+        Please confirm your details for your verified placement scorecard before the countdown begins.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; display: block;">Candidate Full Name *</label>
+          <input type="text" id="input-candidate-name" class="candidate-input" placeholder="e.g. Mehak Negi" maxlength="40" style="width: 100%;" />
+          <span id="candidate-error-msg" class="candidate-feedback-msg" style="display: none;"></span>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; display: block;">College / Department (Optional)</label>
+          <input type="text" id="input-candidate-college" class="candidate-input" placeholder="e.g. Computer Science Engineering" maxlength="50" style="width: 100%;" />
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 0.75rem;">
+          <button id="btn-cancel-candidate-profile" class="clay-btn" style="flex: 1;">Cancel</button>
+          <button id="btn-save-candidate-profile" class="clay-btn clay-btn-primary" style="flex: 1.3;">Start Assessment ⏱️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Audio Sound FAB (Bottom Right Corner) -->
+  <button id="btn-toggle-audio" class="audio-fab" title="Toggle Sound FX" aria-label="Toggle Sound Effects">
+    🔊
+  </button>
+
+
   <!-- Confirm Submission Modal -->
   <div id="confirm-submit-modal" class="teaser-modal-overlay">
     <div class="teaser-modal-box clay-card">
@@ -324,8 +427,11 @@
     </div>
   </div>
 
-  <!-- JavaScript Scripts -->
+
+  <!-- Modular Scripts -->
   <script src="js/questions.js"></script>
+  <script src="js/soundEngine.js"></script>
+  <script src="js/pdfGenerator.js"></script>
   <script src="js/quizEngine.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
