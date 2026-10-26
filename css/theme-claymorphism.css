@@ -1,0 +1,121 @@
+/* ==========================================================================
+   PlacedOrPanic - Theme: Claymorphism
+   Inflated 3D shapes, smooth multi-layered soft inner and outer shadows,
+   chubby pill badges, and playful tactile depth.
+   ========================================================================== */
+
+/* Clay Base Variables */
+:root {
+  --clay-bg: #eaf0f8;
+  --clay-card-bg: #eef4fc;
+  
+  /* Clay Inflatable Shadow Layers (Light + Dark drop & inset highlights) */
+  --clay-shadow-outer: 12px 16px 28px rgba(166, 180, 200, 0.45),
+                       -10px -10px 24px rgba(255, 255, 255, 0.95);
+  
+  --clay-shadow-subtle: 6px 8px 16px rgba(166, 180, 200, 0.35),
+                        -6px -6px 14px rgba(255, 255, 255, 0.9);
+                        
+  --clay-shadow-inset: inset 4px 4px 8px rgba(166, 180, 200, 0.35),
+                       inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+
+  --clay-shadow-float: 16px 24px 36px rgba(150, 168, 192, 0.4),
+                       -12px -12px 28px rgba(255, 255, 255, 0.95);
+
+  --clay-radius-pill: 9999px;
+  --clay-radius-lg: 28px;
+  --clay-radius-md: 20px;
+  --clay-radius-sm: 14px;
+}
+
+/* Clay Card */
+.clay-card {
+  background: var(--clay-card-bg);
+  border-radius: var(--clay-radius-lg);
+  box-shadow: var(--clay-shadow-outer);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.clay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--clay-shadow-float);
+}
+
+/* Clay Button */
+.clay-btn {
+  background: linear-gradient(135deg, #f4f8ff 0%, #e0e9f5 100%);
+  color: var(--text-main);
+  border-radius: var(--clay-radius-pill);
+  box-shadow: 6px 8px 18px rgba(160, 175, 198, 0.4),
+              -5px -5px 14px rgba(255, 255, 255, 0.9),
+              inset 2px 2px 3px rgba(255, 255, 255, 0.8),
+              inset -2px -2px 4px rgba(160, 175, 198, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-main);
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+.clay-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 8px 12px 22px rgba(150, 168, 195, 0.45),
+              -6px -6px 18px rgba(255, 255, 255, 1);
+}
+
+.clay-btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: inset 4px 4px 8px rgba(155, 170, 192, 0.45),
+              inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Primary Clay Button */
+.clay-btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 8px 12px 24px rgba(79, 70, 229, 0.38),
+              -5px -5px 14px rgba(255, 255, 255, 0.8),
+              inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.clay-btn-primary:hover {
+  box-shadow: 10px 16px 30px rgba(79, 70, 229, 0.48),
+              -6px -6px 18px rgba(255, 255, 255, 0.95);
+  color: #ffffff;
+}
+
+/* Clay Inset Well (For inputs, inner counters, timers) */
+.clay-inset-well {
+  background: #e2eaf5;
+  border-radius: var(--clay-radius-md);
+  box-shadow: inset 5px 6px 12px rgba(158, 175, 198, 0.5),
+              inset -4px -5px 10px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Clay Badge / Pill */
+.clay-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--clay-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 4px 5px 10px rgba(165, 180, 200, 0.35),
+              -3px -3px 8px rgba(255, 255, 255, 0.9),
+              inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  background: #edf3fc;
+}

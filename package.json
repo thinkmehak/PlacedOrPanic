@@ -1,0 +1,19 @@
+{
+  "name": "placed-or-panic",
+  "version": "1.0.0",
+  "description": "Timed Multiple-Choice Quiz Management System with Claymorphic and Skeuomorphic Design",
+  "main": "js/app.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "quiz",
+    "placement-prep",
+    "aptitude",
+    "c-programming",
+    "claymorphism",
+    "skeuomorphism"
+  ],
+  "author": "PlacedOrPanic Team",
+  "license": "MIT"
+}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlacedOrPanic - Timed Multiple-Choice Quiz Engine</title>
+  <meta name="description" content="A responsive, interactive timed multiple-choice quiz engine with claymorphic & skeuomorphic design for campus placement tests and semester exam assessment.">
+
+  <!-- Separated Theme Stylesheets as requested -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/theme-claymorphism.css">
+  <link rel="stylesheet" href="css/theme-skeuomorphism.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/coming-soon.css">
+</head>
+<body>
+  <div class="app-viewport">
+    
+    <!-- Global Header -->
+    <header class="app-header clay-card">
+      <div class="brand-wrapper" onclick="showScreen('topic')">
+        <div class="brand-icon-pod skeuo-bezel">
+          <span>🎯</span>
+        </div>
+        <div class="brand-text">
+          <h1>
+            <span class="highlight-placed">Placed</span><span class="highlight-or">Or</span><span class="highlight-panic">Panic</span>
+          </h1>
+          <div class="brand-tagline">Placement Aptitude & Tech Assessment Engine</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="clay-pill badge-coming-soon badge-pro" data-feature-teaser="AI Placement Mock Interviewer">
+          ✨ AI Mock Interview (Soon)
+        </button>
+      </div>
+    </header>
+
+    <!-- Screen 1: Topic Selection Screen -->
+    <main id="screen-topic-select" class="view-screen active">
+      <section class="hero-banner">
+        <div class="hero-pill-badge clay-pill">
+          ⚡ 100% Client-Side Engine • Zero Latency Assessment
+        </div>
+        <h2 class="hero-title">Beat the Clock or Face the Panic.</h2>
+        <p class="hero-subtitle">
+          Practice realistic, timed placement aptitude and technical screening rounds with active countdowns, review palettes, and automated instant scorecards.
+        </p>
+      </section>
+
+      <!-- Topic Grid Header -->
+      <div class="topic-grid-title">
+        <h2>📚 Core Placement Assessment Topics</h2>
+        <span class="clay-pill">4 Core Modules Ready</span>
+      </div>
+
+      <!-- Topics Container (Populated via JS) -->
+      <div id="topics-grid-container" class="topics-grid">
+        <!-- Rendered by app.js -->
+      </div>
+
+      <!-- Upcoming Features & Categories Section -->
+      <section class="upcoming-section clay-inset-well">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+              🚀 Upcoming Placement Modules
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Features currently in development for the next semester rollout. Click any card to preview.
+            </p>
+          </div>
+          <span class="badge-coming-soon badge-panic-lab">🔥 Beta Pipeline</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+          <!-- Upcoming Card 1 -->
+          <div class="topic-card clay-card card-upcoming" data-feature-teaser="DSA Mastery: Trees, Graphs & DP">
+            <div>
+              <div class="topic-icon-wrap skeuo-bezel"><span>🌳</span></div>
+              <h3>DSA Mastery Challenge</h3>
+              <p>Dynamic programming, graph traversals, and recursion tree complexity evaluation.</p>
+            </div>
+            <div class="topic-meta">
+              <span class="badge-coming-soon">Sprint 2</span>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--brand-primary);">Preview Details ➔</span>
+            </div>
+          </div>
+
+          <!-- Upcoming Card 2 -->
+          <div class="topic-card clay-card card-upcoming" data-feature-teaser="Custom Quiz Builder: Upload Your Own Question Paper">
+            <div>
+              <div class="topic-icon-wrap skeuo-bezel"><span>📝</span></div>
+              <h3>Custom Question Builder</h3>
+              <p>Teachers & student clubs can create timed tests with custom time bounds and negative marking.</p>
+            </div>
+            <div class="topic-meta">
+              <span class="badge-coming-soon badge-pro">Faculty Tool</span>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--brand-primary);">Preview Details ➔</span>
+            </div>
+          </div>
+
+          <!-- Upcoming Card 3 -->
+          <div class="topic-card clay-card card-upcoming" data-feature-teaser="Speedrun Panic Mode (30s Per Question)">
+            <div>
+              <div class="topic-icon-wrap skeuo-bezel"><span>⚡</span></div>
+              <h3>Panic Speedrun (30s Clock)</h3>
+              <p>No pauses, extreme pressure, 30 seconds per question with live sound effects & heartbeat.</p>
+            </div>
+            <div class="topic-meta">
+              <span class="badge-coming-soon badge-panic-lab">Hardcore</span>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--brand-primary);">Preview Details ➔</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Screen 2: Interactive Quiz Stage -->
+    <main id="screen-quiz-stage" class="view-screen">
+      <!-- Quiz Navigation Header Bar -->
+      <div class="quiz-header-bar clay-card">
+        <div class="quiz-topic-indicator">
+          <span class="skeuo-led green"></span>
+          <span id="quiz-topic-title" class="topic-badge">Topic Title</span>
+        </div>
+
+        <!-- Skeuomorphic Chronometer / Timer Lens -->
+        <div id="timer-pod" class="timer-container skeuo-lens">
+          <span style="font-size: 1.1rem;">⏱️</span>
+          <div id="timer-digits" class="timer-digits">10:00</div>
+          <span class="skeuo-led red-panic"></span>
+        </div>
+
+        <div>
+          <button id="btn-submit-quiz" class="clay-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border-color: #34d399;">
+            Finish & Submit 🏁
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Stage Split Layout: Question Pane + Navigation Palette -->
+      <div class="quiz-stage-layout">
+        
+        <!-- Left: Question & Options Component -->
+        <section class="question-pane clay-card">
+          <div class="question-status-header">
+            <div class="question-counter-badge">
+              QUESTION <span id="current-q-index">01</span> / <span id="total-q-count">10</span>
+            </div>
+
+            <!-- Mark For Review / Panic Switch -->
+            <button id="btn-panic-review" class="panic-review-btn">
+              🏳️ Mark for Review
+            </button>
+          </div>
+
+          <!-- Question Content -->
+          <h3 id="question-text-content" class="question-text">
+            Loading question...
+          </h3>
+
+          <!-- Optional Code Snippet for Technical Tests -->
+          <pre id="code-snippet-box" class="code-snippet" style="display: none;"></pre>
+
+          <!-- Options Container (Populated via JS) -->
+          <div id="options-list-container" class="options-list">
+            <!-- Dynamically populated options -->
+          </div>
+
+          <!-- Question Navigation Controls -->
+          <div class="quiz-actions-row">
+            <button id="btn-prev-question" class="clay-btn">
+              ⬅ Previous
+            </button>
+            <button id="btn-clear-selection" class="clay-pill" style="cursor: pointer; background: transparent;">
+              Clear Selection
+            </button>
+            <button id="btn-next-question" class="clay-btn clay-btn-primary">
+              Next Question ➔
+            </button>
+          </div>
+        </section>
+
+        <!-- Right: Question Palette / Hardware Switchboard -->
+        <aside class="palette-pane clay-card">
+          <div class="palette-header">
+            <h3>Question Palette</h3>
+            <p>Click any key to instantly navigate</p>
+          </div>
+
+          <!-- Palette Keys Container -->
+          <div id="palette-keys-container" class="palette-grid">
+            <!-- Dynamically generated keys -->
+          </div>
+
+          <!-- Legend -->
+          <div class="palette-legend">
+            <div class="legend-item">
+              <span class="legend-chip" style="background: #10b981;"></span>
+              <span>Answered</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-chip" style="background: #f59e0b;"></span>
+              <span>Marked for Review</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-chip" style="background: linear-gradient(135deg, #10b981 50%, #f59e0b 50%);"></span>
+              <span>Answered & Review</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-chip" style="background: #ffffff; border: 1.5px solid #94a9c2;"></span>
+              <span>Unvisited</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+
+    <!-- Screen 3: Automated Evaluation Scorecard -->
+    <main id="screen-scorecard" class="view-screen">
+      <section class="scorecard-hero clay-card">
+        <div id="score-emblem" class="status-emblem placed">💼</div>
+        <h2 id="score-verdict-title" class="scorecard-title">Placed with Flying Colors!</h2>
+        <p id="score-verdict-msg" class="scorecard-subtitle">
+          Detailed performance breakdown generated based on standardized negative marking criteria (+4 correct, -1 incorrect).
+        </p>
+
+        <!-- Core Metrics Row -->
+        <div class="metrics-row">
+          <div class="metric-card clay-inset-well">
+            <div class="metric-label">Total Score</div>
+            <div id="metric-total-score" class="metric-value">32 / 32</div>
+            <div class="metric-subtext">Scaled placement points</div>
+          </div>
+
+          <div class="metric-card clay-inset-well">
+            <div class="metric-label">Accuracy Rate</div>
+            <div id="metric-accuracy" class="metric-value" style="color: var(--brand-primary);">100%</div>
+            <div class="metric-subtext">Correct vs Attempted</div>
+          </div>
+
+          <div class="metric-card clay-inset-well">
+            <div class="metric-label">Time Taken</div>
+            <div id="metric-time-taken" class="metric-value" style="color: var(--status-review);">04:22</div>
+            <div class="metric-subtext">Out of total time limit</div>
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <button id="btn-retake-quiz" class="clay-btn clay-btn-primary">
+            🔄 Retake Test
+          </button>
+          <button id="btn-home-return" class="clay-btn">
+            🏠 Return to Topics
+          </button>
+          <button class="clay-btn" data-feature-teaser="Download Verified Placement PDF Certificate" style="background: #f8fafc;">
+            📥 Download Report <span class="badge-coming-soon" style="margin-left: 0.35rem;">Soon</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Detailed Question-by-Question Review with Explanations -->
+      <section class="review-section clay-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800;">
+            📝 Detailed Question Explanations & Answer Key
+          </h3>
+          <span class="clay-pill">Immediate Automated Feedback</span>
+        </div>
+        <div id="detailed-review-list">
+          <!-- Populated by app.js -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="app-footer">
+      <div>
+        <strong>PlacedOrPanic</strong> • Timed Multiple-Choice Quiz Management System
+      </div>
+      <div>
+        Claymorphic & Skeuomorphic Hybrid UI • Client-Side Architecture
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Teaser Modal for Coming Soon Features -->
+  <div id="teaser-modal" class="teaser-modal-overlay">
+    <div class="teaser-modal-box clay-card">
+      <div style="font-size: 3rem; margin-bottom: 0.75rem;">⚡</div>
+      <div class="badge-coming-soon badge-pro" style="margin-bottom: 0.75rem;">Future Feature Pipeline</div>
+      <h3 id="teaser-modal-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; margin-bottom: 0.75rem;">Feature In Development</h3>
+      <p id="teaser-modal-desc" style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem;">
+        This module is currently queued for the upcoming semester release! It will include dynamic timed test generations, multiplayer mode, and resume-ready verified PDF certificates.
+      </p>
+      <button id="btn-close-teaser" class="clay-btn clay-btn-primary" style="width: 100%;">
+        Awesome, Keep Me Posted! 👍
+      </button>
+    </div>
+  </div>
+
+  <!-- Confirm Submission Modal -->
+  <div id="confirm-submit-modal" class="teaser-modal-overlay">
+    <div class="teaser-modal-box clay-card">
+      <div style="font-size: 2.75rem; margin-bottom: 0.5rem;">🏁</div>
+      <h3 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">Ready to Finalize Your Test?</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Once submitted, your responses will be locked and your scorecard will be evaluated immediately.
+      </p>
+      <div id="confirm-modal-summary"></div>
+      <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.25rem;">
+        <button id="btn-cancel-submit-action" class="clay-btn" style="flex: 1;">
+          Review More
+        </button>
+        <button id="btn-confirm-submit-action" class="clay-btn clay-btn-primary" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);">
+          Yes, Submit!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/questions.js"></script>
+  <script src="js/quizEngine.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
