@@ -591,6 +591,11 @@
   border: 1px solid rgba(0,0,0,0.15);
 }
 
+.legend-chip-unvisited {
+  background: #ffffff;
+  border: 1.5px solid #94a9c2;
+}
+
 /* --------------------------------------------------------------------------
    5. Automated Evaluation & Scorecard Screen
    -------------------------------------------------------------------------- */
@@ -711,4 +716,23 @@
 
 .review-item.unanswered {
   border-left: 5px solid var(--text-muted);
+}
+
+.review-explanation-note {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-left: 3px solid var(--brand-primary);
+}
+
+.confirm-modal-summary-box {
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: left;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
 }

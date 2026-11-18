@@ -36,6 +36,8 @@ const DOM = {
     valWeb: document.getElementById('meter-web-val')
   },
   audioToggleBtn: document.getElementById('btn-toggle-audio'),
+  themeToggleBtn: document.getElementById('btn-theme-toggle'),
+  themeToggleText: document.getElementById('theme-toggle-text'),
   topicCardsContainer: document.getElementById('topics-grid-container'),
   quiz: {
     topicBadge: document.getElementById('quiz-topic-title'),
@@ -75,6 +77,54 @@ const DOM = {
     btnCancelSubmit: document.getElementById('btn-cancel-submit-action')
   }
 };
+
+/* --------------------------------------------------------------------------
+   0. Dark / Light Theme Management
+   -------------------------------------------------------------------------- */
+function applyTheme(theme, animate = false) {
+  const resolved = theme === 'dark' ? 'dark' : 'light';
+  const root = document.documentElement;
+
+  if (animate) {
+    root.classList.add('theme-transitioning');
+    window.setTimeout(() => root.classList.remove('theme-transitioning'), 320);
+  }
+
+  root.setAttribute('data-theme', resolved);
+
+  if (DOM.themeToggleBtn) {
+    const isDark = resolved === 'dark';
+    DOM.themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+    DOM.themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    DOM.themeToggleBtn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+  }
+
+  if (DOM.themeToggleText) {
+    DOM.themeToggleText.textContent = resolved === 'dark' ? 'Dark' : 'Light';
+  }
+}
+
+function initTheme() {
+  const saved = StorageManager.getTheme();
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initialTheme = saved || (prefersDark ? 'dark' : 'light');
+  applyTheme(initialTheme, false);
+
+  // Follow OS theme changes if user hasn't manually picked one
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemChange = (e) => {
+      if (!StorageManager.getTheme()) {
+        applyTheme(e.matches ? 'dark' : 'light', true);
+      }
+    };
+    if (mq.addEventListener) {
+      mq.addEventListener('change', handleSystemChange);
+    } else if (mq.addListener) {
+      mq.addListener(handleSystemChange);
+    }
+  }
+}
 
 /* --------------------------------------------------------------------------
    1. Candidate Profile & Analytics Handling
@@ -385,7 +435,7 @@ function submitAndEvaluateQuiz() {
         <div><strong>Your Answer:</strong> <span style="color: ${item.isCorrect ? 'var(--status-placed)' : 'var(--status-panic)'}; font-weight: 700;">${userChoiceText}</span></div>
         <div><strong>Correct Answer:</strong> <span style="color: var(--status-placed); font-weight: 700;">${correctChoiceText}</span></div>
       </div>
-      <div style="background: rgba(255, 255, 255, 0.7); padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); border-left: 3px solid var(--brand-primary);">
+      <div class="review-explanation-note">
         💡 <strong>Placement Note:</strong> ${item.explanation}
       </div>
     `;
@@ -505,6 +555,17 @@ function initEventListeners() {
     });
   }
 
+  // Theme Toggle Button (Top-Right Header Switch)
+  if (DOM.themeToggleBtn) {
+    DOM.themeToggleBtn.addEventListener('click', () => {
+      soundEngine.playSwitch();
+      const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      StorageManager.saveTheme(next);
+      applyTheme(next, true);
+    });
+  }
+
   // Floating Audio Toggle Button (Bottom-Right FAB)
   if (DOM.audioToggleBtn) {
     DOM.audioToggleBtn.addEventListener('click', () => {
@@ -589,7 +650,7 @@ function initEventListeners() {
     const modalSummary = document.getElementById('confirm-modal-summary');
     if (modalSummary) {
       modalSummary.innerHTML = `
-        <div style="margin: 1rem 0; font-size: 0.95rem; line-height: 1.6; text-align: left; background: #f8fafc; padding: 1rem; border-radius: 12px;">
+        <div class="confirm-modal-summary-box">
           <div>✅ Answered: <strong>${answeredCount}</strong></div>
           <div>⚠️ Unanswered: <strong>${unansweredCount}</strong></div>
           <div>🚩 Marked for Review: <strong>${reviewCount}</strong></div>
@@ -640,6 +701,7 @@ function initEventListeners() {
 
 // Initialization on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   loadCandidateProfile();
   updateAnalyticsDashboard();
   renderTopicCards();

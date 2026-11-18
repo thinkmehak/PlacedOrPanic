@@ -6,7 +6,8 @@
 const STORAGE_KEYS = {
   USER_PROFILE: 'placed_or_panic_profile',
   ATTEMPTS: 'placed_or_panic_attempts',
-  SETTINGS: 'placed_or_panic_settings'
+  SETTINGS: 'placed_or_panic_settings',
+  THEME: 'placed_or_panic_theme'
 };
 
 const StorageManager = {
@@ -91,6 +92,24 @@ const StorageManager = {
     });
 
     return stats;
+  },
+
+  // Theme Preference ('light' | 'dark' | null)
+  getTheme() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+      return saved === 'dark' || saved === 'light' ? saved : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  saveTheme(theme) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.THEME, theme);
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
   },
 
   clearHistory() {

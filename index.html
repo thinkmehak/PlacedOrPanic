@@ -6,12 +6,25 @@
   <title>PlacedOrPanic - Timed Placement Quiz Management System</title>
   <meta name="description" content="A responsive, interactive timed multiple-choice quiz engine with claymorphic & skeuomorphic design for campus placement tests and semester exam assessment.">
 
+  <!-- Apply saved or system theme before first paint to prevent flash -->
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('placed_or_panic_theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Separated Theme Stylesheets -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/theme-claymorphism.css">
   <link rel="stylesheet" href="css/theme-skeuomorphism.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/coming-soon.css">
+  <link rel="stylesheet" href="css/theme-dark.css">
 </head>
 <body>
   <div class="app-viewport">
@@ -33,6 +46,14 @@
       <div class="header-actions">
         <button class="clay-pill badge-coming-soon badge-pro" data-feature-teaser="AI Placement Mock Interviewer">
           ✨ AI Mock Interview (Soon)
+        </button>
+        <button id="btn-theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to Dark Mode" aria-pressed="false" title="Toggle Dark / Light Mode">
+          <span class="theme-toggle-track">
+            <span class="theme-icon theme-icon-sun" aria-hidden="true">☀️</span>
+            <span class="theme-icon theme-icon-moon" aria-hidden="true">🌙</span>
+            <span class="theme-toggle-thumb"></span>
+          </span>
+          <span id="theme-toggle-text" class="theme-toggle-label">Light</span>
         </button>
       </div>
     </header>
@@ -215,7 +236,7 @@
               <span>Answered & Review</span>
             </div>
             <div class="legend-item">
-              <span class="legend-chip" style="background: #ffffff; border: 1.5px solid #94a9c2;"></span>
+              <span class="legend-chip legend-chip-unvisited"></span>
               <span>Unvisited</span>
             </div>
           </div>
