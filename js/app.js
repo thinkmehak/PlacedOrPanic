@@ -85,12 +85,14 @@ function applyTheme(theme, animate = false) {
   const resolved = theme === 'dark' ? 'dark' : 'light';
   const root = document.documentElement;
 
-  if (animate) {
-    root.classList.add('theme-transitioning');
-    window.setTimeout(() => root.classList.remove('theme-transitioning'), 320);
-  }
+  const swap = () => root.setAttribute('data-theme', resolved);
 
-  root.setAttribute('data-theme', resolved);
+if (animate && document.startViewTransition &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.startViewTransition(swap);
+} else {
+  swap();
+}
 
   if (DOM.themeToggleBtn) {
     const isDark = resolved === 'dark';
